@@ -69,8 +69,8 @@ These messages are not encrypted.
 The Handshake Context is an {{!RFC5705}} (for TLS 1.2 or earlier) or {{!I-D.ietf-tls-tls13}}
 exporter value derived using the label "authenticator handshake context" and
 length 64 bytes. The Finished MAC Key is an exporter value derived using the label
-"authenticator finished key" and length corresponding to the length of the hash
-for the handshake.
+"server authenticator finished key" or "client authenticator finished key", depending
+on the sender, with length corresponding to the length of the handshake hash.
 
 If the connection is TLS 1.2 or earlier, the master secret MUST have been computed
 with the extended master secret {{!RFC7627}} to avoid unkown key share attacks.
