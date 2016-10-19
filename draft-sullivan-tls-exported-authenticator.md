@@ -16,7 +16,7 @@ pi: [toc, sortrefs, symrefs]
 author:
  -  ins: N. Sullivan
     name: Nick Sullivan
-    organization: CloudFlare Inc.
+    organization: Cloudflare Inc.
     email: nick@cloudflare.com
 
 normative:
