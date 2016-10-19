@@ -1,8 +1,8 @@
-# Post-Handshake Authentication in TLS
+# TLS Exported Authenticator
 
 This is the working area for the Individual internet-draft, "Post-Handshake Authentication in TLS".
 
-* [Editor's copy](https://grittygrease.github.io/tls13-post-handshake-auth/)
+* [Editor's copy](https://grittygrease.github.io/tls-exported-authenticator/)
 
 ## Building the Draft
 
