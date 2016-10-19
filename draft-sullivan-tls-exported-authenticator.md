@@ -21,6 +21,8 @@ author:
 
 normative:
   I-D.ietf-tls-tls13:
+  RFC5705:
+  RFC7627:
 
 informative:
 
@@ -28,7 +30,9 @@ informative:
 
 --- abstract
 
-This document describes a mechanism in Transport Layer Security (TLS) to provide an exportable proof of ownership of a certificate that can be transmitted out of band and verified by the other party.
+This document describes a mechanism in Transport Layer Security (TLS) to
+provide an exportable proof of ownership of a certificate that can be
+transmitted out of band and verified by the other party.
 
 --- middle
 
@@ -58,52 +62,74 @@ requiring additional on-the-wire changes during a connection.
 
 # Authenticator
 
-Given an established TLS connection, a certificate and a corresponding private
-key, an authenticator message can be constructed. This authenticator is
-uses the standard data structures from the TLS Authentication Messages,
-but with different encryption keys.
+Given an established TLS connection, a certificate, and a corresponding private
+key, an authenticator message can be constructed. This authenticator uses the
+standard data structures from the TLS 1.3 Authentication Messages with different
+keys.
 
 Certificate
 : The certificate to be used for authentication and any
-supporting certificates in the chain. It should contain a unique
-certificate_request_context defined by the application.
+supporting certificates in the chain.
+
+The certificate message contains an opaque string called
+certificate_request_context which MUST be unique for a given connection. It's format
+should be defined by the application level protocol and MUST be non-zero
+length.
 
 CertificateVerify
 : A signature over the value Hash(Handshake Context + Certificate)
 
 Finished
 : A MAC over the value Hash(Handshake Context + Certificate + CertificateVerify)
-using a MAC key derived from the base key.
+using a finished MAC key derived from the Handshake Context.
 {:br}
 
-The following table defines the Handshake Context and MAC Base Key
-for each scenario:
+The Handshake Context is an {{!RFC5705}} or {{!I-D.ietf-tls-tls13}} exporter value
+derived using the label "authenticator handshake context" and length 64 bytes.
+If the connection is TLS 1.2 or earlier, the master secret MUST have been computed
+with the extended master secret {{!RFC7627}}.
 
-| Mode | Handshake Context | Base Key |
-|------|-------------------|----------|
-| Server | ClientHello ... later of EncryptedExtensions/CertificateRequest | [sender]_authenticator_secret |
-| Client | ClientHello ... ServerFinished     | [sender]_authenticator_secret |
+The keying material is computed using:
+
+       key = HKDF-Expand-Label(Handshake Context,
+                               sender + ", " + purpose,
+                               "",
+                               key_length)
+
+Where sender is either "server" or "client" and purpose is defined by the following
+table:
+
+| Key Type            | Purpose            |
+|:--------------------|:-------------------|
+| encryption key      | "key"      |
+| iv                  | "iv"       |
+| mac key             | "mac"      |
+| finished key        | "finished" |
 
 The exported authenticator message is the sequence:
 Certificate, CertificateVerify, Finished
 
-This message is protected with keys derived from the [sender]_authenticator_secret.
+This message is protected with keys derived from the Handshake context.
 
-The [sender] in this table denotes the sending side.
+# API considerations
 
-The [sender]_authenticator_secret is derived during the key schedule as follows:
-~~~~
-            Master Secret
-                 |
-                 +---------> Derive-Secret(., "client authentictor secret",
-                 |                         ClientHello...ServerFinished)
-                 |                         = client_authenticator_secret
-                 |
-                 +---------> Derive-Secret(., "server authenticator secret",
-                                          ClientHello...ClientFinished)
-                                          = server_handshake_traffic_secret
-~~~~
+TLS implementations supporting the use of exported authenticators MUST provide
+application programming interfaces by which clients and servers may request
+and verify exported authenticators.
 
+Given an established connection, the application should be able to obtain an
+authenticator by providing the following:
+ * certificate_request_context (up to 255 bytes)
+ * certificate chain
+ * signer (either private key, or interface to perform private key operation)
+
+Given an established connection and an authenticator, the application should
+be able to provide the authenticator to the connection, and given the MACs
+and signature verifies, return
+ * certificate chain
+ * certificate_request_context
 
 # Acknowledgements {#ack}
+
+Comments on this proposal were provided by Martin Thompson.
 --- back
