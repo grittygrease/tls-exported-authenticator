@@ -62,9 +62,9 @@ requiring additional on-the-wire changes during a connection.
 
 Given an established TLS connection, a certificate, and a corresponding private
 key, an authenticator message can be constructed by either the client or the
-server. This authenticator uses the message structures from the {{!I-D.ietf-tls-tls13}}
-Authentication Messages, but with a different handshake context and finished key.
-This message is not encrypted.
+server. This authenticator uses the message structures from section 4.4. of
+{{!I-D.ietf-tls-tls13}}, but uses a different handshake context and finished key.
+These messages are not encrypted.
 
 The Handshake Context is an {{!RFC5705}} (for TLS 1.2 or earlier) or {{!I-D.ietf-tls-tls13}}
 exporter value derived using the label "authenticator handshake context" and
@@ -107,14 +107,15 @@ and verify exported authenticator messages.
 
 Given an established connection, the application should be able to obtain an
 authenticator by providing the following:
- * certificate_request_context (up to 255 bytes)
- * valid certificate chain for the connection
+ * certificate_request_context (from 1 to 255 bytes)
+ * valid certificate chain for the connection and associated messages (OCSP, SCT, etc.)
  * signer (either private key, or interface to perform private key operation)
 
-Given an established connection and an authenticator, the application should
-be able to provide the authenticator to the connection, and given the Finished
-and CertificateVerify messages verify, return
- * certificate chain
+Given an established connection and an exported authenticator message, the
+application should be able to provide the authenticator to the connection.
+If the Finished and CertificateVerify messages verify, the TLS library should
+return the following:
+ * certificate chain and extensions
  * certificate_request_context
 
 # Acknowledgements {#ack}
