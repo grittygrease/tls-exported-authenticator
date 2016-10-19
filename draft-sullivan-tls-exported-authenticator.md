@@ -94,7 +94,7 @@ using the hash function from the handshake and the Finished MAC Key as a key.
 
 The certificates used in the Certificate message must conform to the requirements
 of a Certificate message in the version of TLS that is being negotiated as
-described in section 4.2.3. of {{{!I-D.ietf-tls-tls13}}.
+described in section 4.2.3. of {{!I-D.ietf-tls-tls13}}.
 
 The exported authenticator message is the sequence:
 Certificate, CertificateVerify, Finished
