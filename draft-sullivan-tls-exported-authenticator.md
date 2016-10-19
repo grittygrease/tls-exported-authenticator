@@ -73,7 +73,7 @@ length 64 bytes. The Finished MAC Key is an exporter value derived using the lab
 on the sender, with length corresponding to the length of the handshake hash.
 
 If the connection is TLS 1.2 or earlier, the master secret MUST have been computed
-with the extended master secret {{!RFC7627}} to avoid unkown key share attacks.
+with the extended master secret {{!RFC7627}} to avoid key synchronization attacks.
 
 Certificate
 : The certificate to be used for authentication and any
