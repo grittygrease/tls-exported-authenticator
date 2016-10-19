@@ -48,13 +48,11 @@ party then validated by the other party.
 This mechanism is useful in the following situations:
 * servers that have the ability to serve requests from multiple domains over
 the same connection but do not have a certificate that is simultaneously
-authoritative over all of them
+authoritative for all of them
 * servers that have resources that require client authentication to access
 and need to request client authentication after the connection has started
 * clients that want to assert their identity to a server after a connection
 has been established
-* clients that wish to ask a server to authenticate for a new domain not
-covered by the initial connection certificate 
 
 This document intends to replace much of the functionality of renegotiation
 in previous versions of TLS. It has the advantages over renegotiation of not
@@ -63,16 +61,26 @@ requiring additional on-the-wire changes during a connection.
 # Authenticator
 
 Given an established TLS connection, a certificate, and a corresponding private
-key, an authenticator message can be constructed. This authenticator uses the
-standard data structures from the TLS 1.3 Authentication Messages with different
-keys.
+key, an authenticator message can be constructed by either the client or the
+server. This authenticator uses the message structures from the {{!I-D.ietf-tls-tls13}}
+Authentication Messages, but with a different handshake context and finished key.
+This message is not encrypted.
+
+The Handshake Context is an {{!RFC5705}} (for TLS 1.2 or earlier) or {{!I-D.ietf-tls-tls13}}
+exporter value derived using the label "authenticator handshake context" and
+length 64 bytes. The Finished MAC Key is an exporter value derived using the label
+"authenticator finished key" and length corresponding to the length of the hash
+for the handshake.
+
+If the connection is TLS 1.2 or earlier, the master secret MUST have been computed
+with the extended master secret {{!RFC7627}} to avoid unkown key share attacks.
 
 Certificate
 : The certificate to be used for authentication and any
 supporting certificates in the chain.
 
 The certificate message contains an opaque string called
-certificate_request_context which MUST be unique for a given connection. It's format
+certificate_request_context which MUST be unique for a given connection. Its format
 should be defined by the application level protocol and MUST be non-zero
 length.
 
@@ -80,52 +88,32 @@ CertificateVerify
 : A signature over the value Hash(Handshake Context + Certificate)
 
 Finished
-: A MAC over the value Hash(Handshake Context + Certificate + CertificateVerify)
-using a finished MAC key derived from the Handshake Context.
+: A HMAC over the value Hash(Handshake Context + Certificate + CertificateVerify)
+using the hash function from the handshake and the Finished MAC Key as a key.
 {:br}
 
-The Handshake Context is an {{!RFC5705}} or {{!I-D.ietf-tls-tls13}} exporter value
-derived using the label "authenticator handshake context" and length 64 bytes.
-If the connection is TLS 1.2 or earlier, the master secret MUST have been computed
-with the extended master secret {{!RFC7627}}.
-
-The keying material is computed using:
-
-       key = HKDF-Expand-Label(Handshake Context,
-                               sender + ", " + purpose,
-                               "",
-                               key_length)
-
-Where sender is either "server" or "client" and purpose is defined by the following
-table:
-
-| Key Type            | Purpose            |
-|:--------------------|:-------------------|
-| encryption key      | "key"      |
-| iv                  | "iv"       |
-| mac key             | "mac"      |
-| finished key        | "finished" |
+The certificates used in the Certificate message must conform to the requirements
+of a Certificate message in the version of TLS that is being negotiated as
+described in section 4.2.3. of {{{!I-D.ietf-tls-tls13}}.
 
 The exported authenticator message is the sequence:
 Certificate, CertificateVerify, Finished
-
-This message is protected with keys derived from the Handshake context.
 
 # API considerations
 
 TLS implementations supporting the use of exported authenticators MUST provide
 application programming interfaces by which clients and servers may request
-and verify exported authenticators.
+and verify exported authenticator messages.
 
 Given an established connection, the application should be able to obtain an
 authenticator by providing the following:
  * certificate_request_context (up to 255 bytes)
- * certificate chain
+ * valid certificate chain for the connection
  * signer (either private key, or interface to perform private key operation)
 
 Given an established connection and an authenticator, the application should
-be able to provide the authenticator to the connection, and given the MACs
-and signature verifies, return
+be able to provide the authenticator to the connection, and given the Finished
+and CertificateVerify messages verify, return
  * certificate chain
  * certificate_request_context
 
