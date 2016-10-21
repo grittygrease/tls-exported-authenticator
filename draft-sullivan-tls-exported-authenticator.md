@@ -120,5 +120,6 @@ return the following:
 
 # Acknowledgements {#ack}
 
-Comments on this proposal were provided by Martin Thompson.
+Comments on this proposal were provided by Martin Thomson.
+
 --- back
