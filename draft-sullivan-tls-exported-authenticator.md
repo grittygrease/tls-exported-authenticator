@@ -118,6 +118,10 @@ return the following:
  * certificate chain and extensions
  * certificate_request_context
 
+# Security Considerations
+
+TBD
+
 # Acknowledgements {#ack}
 
 Comments on this proposal were provided by Martin Thomson.
