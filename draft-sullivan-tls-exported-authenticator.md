@@ -46,13 +46,14 @@ proof of authentication can be exported and transmitted out of band from one
 party then validated by the other party.
 
 This mechanism is useful in the following situations:
-* servers that have the ability to serve requests from multiple domains over
-the same connection but do not have a certificate that is simultaneously
-authoritative for all of them
+
+* servers that are authoritative for multiple domains the same connection
+but do not have a certificate that is simultaneously authoritative for all
+of them
 * servers that have resources that require client authentication to access
 and need to request client authentication after the connection has started
-* clients that want to assert their identity to a server after a connection
-has been established
+* clients that want to assert ownership over an identity to a server after
+a connection has been established
 
 This document intends to replace much of the functionality of renegotiation
 in previous versions of TLS. It has the advantages over renegotiation of not
@@ -63,7 +64,7 @@ requiring additional on-the-wire changes during a connection.
 Given an established TLS connection, a certificate, and a corresponding private
 key, an authenticator message can be constructed by either the client or the
 server. This authenticator uses the message structures from section 4.4. of
-{{!I-D.ietf-tls-tls13}}, but uses a different handshake context and finished key.
+{{!I-D.ietf-tls-tls13}}, but with a different handshake context and finished key.
 These messages are not encrypted.
 
 The Handshake Context is an {{!RFC5705}} (for TLS 1.2 or earlier) or {{!I-D.ietf-tls-tls13}}
@@ -107,14 +108,17 @@ and verify exported authenticator messages.
 
 Given an established connection, the application should be able to obtain an
 authenticator by providing the following:
+
  * certificate_request_context (from 1 to 255 bytes)
- * valid certificate chain for the connection and associated messages (OCSP, SCT, etc.)
- * signer (either private key, or interface to perform private key operation)
+ * valid certificate chain for the connection and associated extensions (OCSP, SCT, etc.)
+ * signer (either the private key associated with the certificate, or interface
+to perform private key operation)
 
 Given an established connection and an exported authenticator message, the
 application should be able to provide the authenticator to the connection.
 If the Finished and CertificateVerify messages verify, the TLS library should
 return the following:
+
  * certificate chain and extensions
  * certificate_request_context
 
