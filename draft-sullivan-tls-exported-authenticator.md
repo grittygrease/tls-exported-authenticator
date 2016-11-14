@@ -65,7 +65,8 @@ Given an established TLS connection, a certificate, and a corresponding private
 key, an authenticator message can be constructed by either the client or the
 server. This authenticator uses the message structures from section 4.4. of
 {{!I-D.ietf-tls-tls13}}, but with a different handshake context and finished key.
-These messages are not encrypted.
+Unlike the Certificate and CertificateRequest messages in TLS 1.3, the messages
+described in this draft are not encryped with a handshake key.
 
 The Handshake Context is an {{!RFC5705}} (for TLS 1.2 or earlier) or {{!I-D.ietf-tls-tls13}}
 exporter value derived using the label "authenticator handshake context" and
