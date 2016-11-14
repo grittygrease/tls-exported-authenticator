@@ -123,6 +123,11 @@ return the following:
  * certificate chain and extensions
  * certificate_request_context
 
+In order for the application layer to communicate which certificates it will
+accept, an API should be exposed that returns an array of TLS 1.3 SignatureScheme
+objects that corresponds to the signature algorithms that the library is
+willing to validate in an exported authenticator message.
+
 # Security Considerations
 
 TBD
