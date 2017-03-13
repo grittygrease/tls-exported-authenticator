@@ -28,6 +28,8 @@ normative:
     author:
     -
       ins: "H. Krawczyk"
+    date: 2016
+    target: https://eprint.iacr.org/2016/711.pdf
 
 informative:
 
@@ -118,8 +120,8 @@ using the hash function from the handshake and the Finished MAC Key as a key.
 
 The certificates used in the Certificate message MUST conform to the requirements
 of a Certificate message in the version of TLS negotiated.  This is
-described in section 4.2.3. of {{!I-D.ietf-tls-tls13}} and sections 7.4.2. and 7.4.6.
-of {{!RFC5246}}.
+described in section 4.2.3. of {{!I-D.ietf-tls-tls13}} and
+sections 7.4.2. and 7.4.6. of {{!RFC5246}}.
 
 The exported authenticator message is the concatenation of messages:
 Certificate || CertificateVerify || Finished
@@ -160,22 +162,22 @@ client presents an authenticator to a server, {{SIGMAC}} presents a relevant
 framework for analysis.
 
 From a formal security perspective, one drawback of this mechanism is that there is
-no explicit signaling mechanism for one party to acknowlege an Authenticator
+no explicit signaling mechanism for one party to acknowledge an Authenticator
 to the party who computed it.  Nothing about the state of the connection
 is changed when a new Authenticator is exported, and the Handshake Context of the
 TLS connection is unchanged after creating or validating an authenticator.  This
 property makes it difficult to formally prove that a server is jointly authoritative
 over multiple certificates, rather than individually authoritative on each certificate.
 
-Another result of the uni-direction nature of Authenticator messages is that the
+Another result of the unidirectional nature of Authenticator messages is that the
 view of which certificates the other party is authoritative over does not reside
-in the TLS state machine, but instead needs to be managed at the application layer.
-Not knowing when the exported authenticator was created or validated at the TLS layer also means that
-assumptions about when the other party is considered authoritative can not be
-determined purely from where a message is in the TLS record layer.  A valid authenticator
-can be created at any time during the connection.  The application needs to keep track of
-whether or not a certificate is valid for specific data sent over the connection,
-relying on the internal state of the TLS connection is not enough.
+in the TLS state machine. Not knowing when the exported authenticator was created
+or validated at the TLS layer also means that assumptions about when the other party
+is considered authoritative can not be determined purely from where in the
+in the TLS record layer it was sent.  A valid authenticator can be created at any time during
+the connection.  If it matters to the application whether or not an authenticator
+was acknowledged before or after a particular piece of data, it should be tracked
+as part of the application layer semantics.
 
 # Acknowledgements {#ack}
 
