@@ -2,7 +2,6 @@
 title: Exported Authenticators in TLS
 abbrev: TLS Exported Authenticator
 docname: draft-sullivan-tls-exported-authenticator-latest
-date: 2016
 category: std
 
 ipr:
@@ -21,8 +20,14 @@ author:
 
 normative:
   I-D.ietf-tls-tls13:
+  RFC5246:
   RFC5705:
   RFC7627:
+  SIGMAC:
+    title: "A Unilateral-to-Mutual Authentication Compiler for Key Exchange (with Applications to Client Authentication in TLS 1.3)"
+    author:
+    -
+      ins: "H. Krawczyk"
 
 informative:
 
@@ -40,10 +45,10 @@ transmitted out of band and verified by the other party.
 
 This document provides a way to authenticate one party of a Transport Layer
 Security (TLS) communication to another using a certificate after the session
-has been established. This allows both the client and server to prove ownership
-of additional identities at any time after the handshake has completed. This
+has been established.  This allows both the client and server to prove ownership
+of additional identities at any time after the handshake has completed.  This
 proof of authentication can be exported and transmitted out of band from one
-party then validated by the other party.
+party to be validated by the other party.
 
 This mechanism is useful in the following situations:
 
@@ -56,25 +61,39 @@ and need to request client authentication after the connection has started
 a connection has been established
 
 This document intends to replace much of the functionality of renegotiation
-in previous versions of TLS. It has the advantages over renegotiation of not
-requiring additional on-the-wire changes during a connection.
+in previous versions of TLS.  It has the advantages over renegotiation of not
+requiring additional on-the-wire changes during a connection.  For simplicity,
+only TLS 1.2 and later are supported.
 
 # Authenticator
 
-Given an established TLS connection, a certificate, and a corresponding private
-key, an authenticator message can be constructed by either the client or the
-server. This authenticator uses the message structures from section 4.4. of
-{{!I-D.ietf-tls-tls13}}, but with a different handshake context and finished key.
-Unlike the Certificate and CertificateRequest messages in TLS 1.3, the messages
-described in this draft are not encryped with a handshake key.
+The authenticator is a structured message that can be exported from either
+party of a TLS connection.  It can be sent out-of-band to the other party
+of a TLS connection to be validated.
 
-The Handshake Context is an {{!RFC5705}} (for TLS 1.2 or earlier) or {{!I-D.ietf-tls-tls13}}
+An authenticator message can be constructed by either the client or the
+server given an established TLS connection, a certificate, and a corresponding private
+key.  This authenticator uses the message structures from section 4.4. of
+{{!I-D.ietf-tls-tls13}}, but different parameters.  Also, unlike the Certificate and
+CertificateRequest messages in TLS 1.3, the messages described in this draft
+are not encryped with a handshake key.
+
+Each Authenticator is computed using a Handshake Context and Finished MAC Key
+derived from the TLS session.  The Handshake Context is identical
+for both parties of the TLS connection, the Finished MAC Key is dependent
+on whether the Authenticator is created by the client or the server.
+
+* The Handshake Context is an {{!RFC5705}} (for TLS 1.2) or {{!I-D.ietf-tls-tls13}}
 exporter value derived using the label "authenticator handshake context" and
-length 64 bytes. The Finished MAC Key is an exporter value derived using the label
+length 64 bytes.
+* The Finished MAC Key is an exporter value derived using the label
 "server authenticator finished key" or "client authenticator finished key", depending
-on the sender, with length corresponding to the length of the handshake hash.
+on the sender.  The length of this key is equal to the length of the output
+of the hash function negotiated in TLS.  For TLS 1.3, it's the hash algorithm of the cipher
+suite.  For TLS 1.2, it's the hash algorithm selected for the PRF for AEAD
+ciphers, or the hash algorithm used as the HMAC in non-AEAD ciphers.
 
-If the connection is TLS 1.2 or earlier, the master secret MUST have been computed
+If the connection is TLS 1.2, the master secret MUST have been computed
 with the extended master secret {{!RFC7627}} to avoid key synchronization attacks.
 
 Certificate
@@ -82,24 +101,28 @@ Certificate
 supporting certificates in the chain.
 
 The certificate message contains an opaque string called
-certificate_request_context which MUST be unique for a given connection. Its format
-should be defined by the application level protocol and MUST be non-zero
-length.
+certificate_request_context which MUST be unique for a given connection.  Its format
+should be defined by the application layer protocol and MUST be non-zero
+length.  For example, it may be a randomly chosen identifier used by the higher-level
+protocol during the transport of the Authenticator to the other party.
 
 CertificateVerify
-: A signature over the value Hash(Handshake Context + Certificate)
+: A signature over the value
+Hash(Handshake Context || Certificate)
 
 Finished
-: A HMAC over the value Hash(Handshake Context + Certificate + CertificateVerify)
+: A HMAC over the value
+Hash(Handshake Context || Certificate || CertificateVerify)
 using the hash function from the handshake and the Finished MAC Key as a key.
 {:br}
 
-The certificates used in the Certificate message must conform to the requirements
-of a Certificate message in the version of TLS that is being negotiated as
-described in section 4.2.3. of {{!I-D.ietf-tls-tls13}}.
+The certificates used in the Certificate message MUST conform to the requirements
+of a Certificate message in the version of TLS negotiated.  This is
+described in section 4.2.3. of {{!I-D.ietf-tls-tls13}} and sections 7.4.2. and 7.4.6.
+of {{!RFC5246}}.
 
-The exported authenticator message is the sequence:
-Certificate, CertificateVerify, Finished
+The exported authenticator message is the concatenation of messages:
+Certificate || CertificateVerify || Finished
 
 # API considerations
 
@@ -111,7 +134,8 @@ Given an established connection, the application should be able to obtain an
 authenticator by providing the following:
 
  * certificate_request_context (from 1 to 255 bytes)
- * valid certificate chain for the connection and associated extensions (OCSP, SCT, etc.)
+ * valid certificate chain for the connection and associated extensions
+(OCSP, SCT, etc.)
  * signer (either the private key associated with the certificate, or interface
 to perform private key operation)
 
@@ -130,10 +154,32 @@ willing to validate in an exported authenticator message.
 
 # Security Considerations
 
-TBD
+The Certificate/Verify/Finished pattern intentionally looks like the TLS 1.3
+pattern which now has been analyzed several times.  In the case where the
+client presents an authenticator to a server, {{SIGMAC}} presents a relevant
+framework for analysis.
+
+From a formal security perspective, one drawback of this mechanism is that there is
+no explicit signaling mechanism for one party to acknowlege an Authenticator
+to the party who computed it.  Nothing about the state of the connection
+is changed when a new Authenticator is exported, and the Handshake Context of the
+TLS connection is unchanged after creating or validating an authenticator.  This
+property makes it difficult to formally prove that a server is jointly authoritative
+over multiple certificates, rather than individually authoritative on each certificate.
+
+Another result of the uni-direction nature of Authenticator messages is that the
+view of which certificates the other party is authoritative over does not reside
+in the TLS state machine, but instead needs to be managed at the application layer.
+Not knowing when the exported authenticator was created or validated at the TLS layer also means that
+assumptions about when the other party is considered authoritative can not be
+determined purely from where a message is in the TLS record layer.  A valid authenticator
+can be created at any time during the connection.  The application needs to keep track of
+whether or not a certificate is valid for specific data sent over the connection,
+relying on the internal state of the TLS connection is not enough.
 
 # Acknowledgements {#ack}
 
-Comments on this proposal were provided by Martin Thomson.
+Comments on this proposal were provided by Martin Thomson.  Suggestions for the
+security considerations section were provided by Karthikeyan Bhargavan.
 
 --- back
