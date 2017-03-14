@@ -52,15 +52,19 @@ of additional identities at any time after the handshake has completed.  This
 proof of authentication can be exported and transmitted out of band from one
 party to be validated by the other party.
 
-This mechanism is useful in the following situations:
+This mechanism provides two advantages over the authentication that TLS natively
+provides:
 
-* servers that are authoritative for multiple domains the same connection
-but do not have a certificate that is simultaneously authoritative for all
-of them
-* servers that have resources that require client authentication to access
-and need to request client authentication after the connection has started
-* clients that want to assert ownership over an identity to a server after
-a connection has been established
+multiple identities:
+
+: Endpoints that are authoritative for multiple identities - but do not have a
+  single certificate that includes all of the identities - can authenticate with
+  those identities over a single connection.
+
+spontaneous authentication
+
+: Endpoints can authenticate after a connection is established, in response to
+  events in a higher-layer protocol, as well as integrating more context.
 
 This document intends to replace much of the functionality of renegotiation
 in previous versions of TLS.  It has the advantages over renegotiation of not
