@@ -85,15 +85,18 @@ derived from the TLS session.  The Handshake Context is identical
 for both parties of the TLS connection, the Finished MAC Key is dependent
 on whether the Authenticator is created by the client or the server.
 
-* The Handshake Context is an {{!RFC5705}} (for TLS 1.2) or {{!I-D.ietf-tls-tls13}}
-exporter value derived using the label "authenticator handshake context" and
-length 64 bytes.
+* The Handshake Context is an {{!RFC5705}} (for TLS 1.2) or
+{{!I-D.ietf-tls-tls13}} exporter value derived using the label
+"EXPORTER-authenticator handshake context" and length 64 bytes.
+
 * The Finished MAC Key is an exporter value derived using the label
-"server authenticator finished key" or "client authenticator finished key", depending
-on the sender.  The length of this key is equal to the length of the output
-of the hash function negotiated in TLS.  For TLS 1.3, it's the hash algorithm of the cipher
-suite.  For TLS 1.2, it's the hash algorithm selected for the PRF for AEAD
-ciphers, or the hash algorithm used as the HMAC in non-AEAD ciphers.
+"EXPORTER-server authenticator finished key" or "EXPORTER-client authenticator
+finished key", depending on the sender.  The length of this key is equal to the
+length of the output of the hash function negotiated in TLS.  For TLS 1.3, it's
+the hash algorithm of the cipher suite.  For TLS 1.2, it's the hash algorithm
+selected for the pseudorandom function (PRF); cipher suites that do not use the
+TLS PRF MUST define a hash function that can be used for this purpose or they
+cannot be used.
 
 If the connection is TLS 1.2, the master secret MUST have been computed
 with the extended master secret {{!RFC7627}} to avoid key synchronization attacks.
