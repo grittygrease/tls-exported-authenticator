@@ -55,13 +55,13 @@ party to be validated by the other party.
 This mechanism provides two advantages over the authentication that TLS natively
 provides:
 
-multiple identities:
+multiple identities -
 
 : Endpoints that are authoritative for multiple identities - but do not have a
   single certificate that includes all of the identities - can authenticate with
   those identities over a single connection.
 
-spontaneous authentication
+spontaneous authentication -
 
 : Endpoints can authenticate after a connection is established, in response to
   events in a higher-layer protocol, as well as integrating more context.
