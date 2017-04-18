@@ -67,6 +67,13 @@ in previous versions of TLS.  It has the advantages over renegotiation of not
 requiring additional on-the-wire changes during a connection.  For simplicity,
 only TLS 1.2 and later are supported.
 
+Post-handshake authentication is defined in TLS 1.3, but it has
+the disadvantage of requiring additional state to be stored in the TLS
+state machine and it composes poorly with multiplexed connection protocols
+like HTTP/2.  It is also only available for client authentication.  This
+mechanism is intended to be used as part of a replacement for post-handshake
+authentication in applications.
+
 # Authenticator
 
 The authenticator is a structured message that can be exported from either
@@ -78,25 +85,23 @@ server given an established TLS connection, a certificate, and a corresponding p
 key.  This authenticator uses the message structures from section 4.4. of
 {{!I-D.ietf-tls-tls13}}, but different parameters.  Also, unlike the Certificate and
 CertificateRequest messages in TLS 1.3, the messages described in this draft
-are not encryped with a handshake key.
+are not encrypted with a handshake key.
 
-Each Authenticator is computed using a Handshake Context and Finished MAC Key
+Each authenticator is computed using a Handshake Context and Finished MAC Key
 derived from the TLS session.  The Handshake Context is identical
 for both parties of the TLS connection, the Finished MAC Key is dependent
-on whether the Authenticator is created by the client or the server.
+on whether the authenticator is created by the client or the server.
 
 * The Handshake Context is an {{!RFC5705}} (for TLS 1.2) or
-{{!I-D.ietf-tls-tls13}} exporter value derived using the label
+{{!I-D.ietf-tls-tls13}} (for TLS 1.3) exporter value derived using the label
 "EXPORTER-authenticator handshake context" and length 64 bytes.
 
 * The Finished MAC Key is an exporter value derived using the label
 "EXPORTER-server authenticator finished key" or "EXPORTER-client authenticator
 finished key", depending on the sender.  The length of this key is equal to the
-length of the output of the hash function negotiated in TLS.  For TLS 1.3, it's
-the hash algorithm of the cipher suite.  For TLS 1.2, it's the hash algorithm
-selected for the pseudorandom function (PRF); cipher suites that do not use the
-TLS PRF MUST define a hash function that can be used for this purpose or they
-cannot be used.
+length of the output of the hash function selected in TLS for the pseudorandom
+function (PRF); cipher suites that do not use the TLS PRF MUST define a hash
+function that can be used for this purpose or they cannot be used.
 
 If the connection is TLS 1.2, the master secret MUST have been computed
 with the extended master secret {{!RFC7627}} to avoid key synchronization attacks.
@@ -108,8 +113,8 @@ supporting certificates in the chain.
 The certificate message contains an opaque string called
 certificate_request_context which MUST be unique for a given connection.  Its format
 should be defined by the application layer protocol and MUST be non-zero
-length.  For example, it may be a randomly chosen identifier used by the higher-level
-protocol during the transport of the Authenticator to the other party.
+length.  For example, it may be a sequence number used by the higher-level
+protocol during the transport of the authenticator to the other party.
 
 CertificateVerify
 : A signature over the value
@@ -131,6 +136,8 @@ Certificate || CertificateVerify || Finished
 
 # API considerations
 
+The creation and validation of exported authenticators SHOULD be implemented inside
+TLS library even if it is possible to implement it at the application layer.
 TLS implementations supporting the use of exported authenticators MUST provide
 application programming interfaces by which clients and servers may request
 and verify exported authenticator messages.
@@ -164,23 +171,14 @@ pattern which now has been analyzed several times.  In the case where the
 client presents an authenticator to a server, {{SIGMAC}} presents a relevant
 framework for analysis.
 
-From a formal security perspective, one drawback of this mechanism is that there is
-no explicit signaling mechanism for one party to acknowledge an Authenticator
-to the party who computed it.  Nothing about the state of the connection
-is changed when a new Authenticator is exported, and the Handshake Context of the
-TLS connection is unchanged after creating or validating an authenticator.  This
-property makes it difficult to formally prove that a server is jointly authoritative
-over multiple certificates, rather than individually authoritative on each certificate.
-
-Another result of the unidirectional nature of Authenticator messages is that the
-view of which certificates the other party is authoritative over does not reside
-in the TLS state machine. Not knowing when the exported authenticator was created
-or validated at the TLS layer also means that assumptions about when the other party
-is considered authoritative can not be determined purely from where in the
-in the TLS record layer it was sent.  A valid authenticator can be created at any time during
-the connection.  If it matters to the application whether or not an authenticator
-was acknowledged before or after a particular piece of data, it should be tracked
-as part of the application layer semantics.
+Authenticators are independent and unidirectional. There is no explicit state change
+inside TLS when an authenticator is either created or validated.
+*  This property makes it difficult to formally prove
+that a server is jointly authoritative over multiple certificates, rather than
+individually authoritative over each.
+* There is no indication in the TLS layer about which point in time an authenticator was
+computed.  Any feedback about the time of creation or validation of the authenticator
+should be tracked as part of the application layer semantics if required.
 
 # Acknowledgements {#ack}
 
