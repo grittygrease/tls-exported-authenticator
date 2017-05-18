@@ -1,7 +1,7 @@
 ---
 title: Exported Authenticators in TLS
 abbrev: TLS Exported Authenticator
-docname: draft-sullivan-tls-exported-authenticator-latest
+docname: draft-ietf-tls-exported-authenticator-latest
 category: std
 
 ipr:
