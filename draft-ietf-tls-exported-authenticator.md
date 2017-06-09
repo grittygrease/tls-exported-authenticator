@@ -92,13 +92,13 @@ CertificateRequest messages in TLS 1.3, the messages described in this draft
 are not encrypted with a handshake key.
 
 Each authenticator is computed using a Handshake Context and Finished MAC Key
-derived from the TLS session.  The Handshake Context is identical
-for both parties of the TLS connection, the Finished MAC Key is dependent
-on whether the authenticator is created by the client or the server.
+derived from the TLS session.  The Handshake Context is and Finished MAC Key
+are dependent on whether the authenticator is created by the client or the server.
 
 * The Handshake Context is an {{!RFC5705}} (for TLS 1.2) or
 {{!I-D.ietf-tls-tls13}} (for TLS 1.3) exporter value derived using the label
-"EXPORTER-authenticator handshake context" and length 64 bytes.
+"EXPORTER-client authenticator handshake context" or "EXPORTER-server authenticator
+handshake context", depending on the sender, and length 64 bytes.
 
 * The Finished MAC Key is an exporter value derived using the label
 "EXPORTER-server authenticator finished key" or "EXPORTER-client authenticator
