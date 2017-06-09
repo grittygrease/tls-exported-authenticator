@@ -81,8 +81,9 @@ authentication in applications.
 # Authenticator
 
 The authenticator is a structured message that can be exported from either
-party of a TLS connection.  It can be sent out-of-band to the other party
-of a TLS connection to be validated.
+party of a TLS connection.  It can be transmitted to the other party of
+the TLS connection at the application layer.  The application layer protocol
+used to send the authenticator SHOULD use TLS as its underlying transport.
 
 An authenticator message can be constructed by either the client or the
 server given an established TLS connection, a certificate, and a corresponding private
