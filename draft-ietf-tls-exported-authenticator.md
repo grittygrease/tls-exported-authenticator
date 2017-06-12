@@ -116,7 +116,7 @@ supporting certificates in the chain.
 
 The certificate message contains an opaque string called
 certificate_request_context which SHOULD be unique for a given connection.  Its format
-should be defined by the application layer protocol and SHOULD be non-zero
+is be defined by the application layer protocol and SHOULD be non-zero
 length.  For example, it may be a sequence number used by the higher-level
 protocol during the transport of the authenticator to the other party.  Using
 a unique value allows the application to prevent replays by tying the authenticator
@@ -125,6 +125,13 @@ to a given context.
 CertificateVerify
 : A signature over the value
 Hash(Handshake Context || Certificate)
+
+This is described in section 4.2.3. of {{!I-D.ietf-tls-tls13}}.  For servers
+the signature scheme MUST be compatible with the client's advertised support
+and the TLS version.  For TLS 1.2, the signature scheme must match one of
+the signature and hash algorithms advertised in the supported_signature_algorithms
+extension.  For TLS 1.3 it must match one of the signature schemes presented
+in supported_signature_algorithms, excluding all RSASSA-PKCS1-v1_5 algorithms.
 
 Finished
 : A HMAC over the value
@@ -140,6 +147,11 @@ sections 7.4.2. and 7.4.6. of {{!RFC5246}}.
 The exported authenticator message is the concatenation of messages:
 Certificate || CertificateVerify || Finished
 
+A given exported authenticator can be validated by checking the validity of the
+CertificateVerify message and recomputing the Finished message to see it it
+matches.  If the underlying connection is TLS 1.3, CertificateVerify messages
+with an RSASSA-PKCS1-v1_5 algorithm as its SignatureScheme MUST be rejected.
+
 # API considerations
 
 The creation and validation of exported authenticators SHOULD be implemented inside
@@ -148,27 +160,31 @@ TLS implementations supporting the use of exported authenticators MUST provide
 application programming interfaces by which clients and servers may request
 and verify exported authenticator messages.
 
-Given an established connection, the application should be able to obtain an
-authenticator by providing the following:
+Given an established connection, the application SHOULD be able to call an
+"authenticate" API which takes as input:
 
  * certificate_request_context (from 1 to 255 bytes)
  * valid certificate chain for the connection and associated extensions
 (OCSP, SCT, etc.)
  * signer (either the private key associated with the certificate, or interface
 to perform private key operation)
+ * signature scheme
+
+The API returns the exported authentiator as output.
 
 Given an established connection and an exported authenticator message, the
-application should be able to provide the authenticator to the connection.
-If the Finished and CertificateVerify messages verify, the TLS library should
-return the following:
+application SHOULD be able to call a "validate" API that takes an exported
+authenticator as an input. If the Finished and CertificateVerify messages
+verify correctly, the API returns the following as output:
 
  * certificate chain and extensions
  * certificate_request_context
 
-In order for the application layer to communicate which certificates it will
-accept, an API should be exposed that returns an array of TLS 1.3 SignatureScheme
-objects that corresponds to the signature algorithms that the library is
-willing to validate in an exported authenticator message.
+In order for the application layer to be able to choose which certificates
+and signature schemes to use when constructing an authenticator.  An API
+SHOULD be exposed that returns an array of TLS 1.3 SignatureScheme
+objects that corresponds to the signature algorithms the library is
+willing to accept as part of an exported authenticator message.
 
 # Security Considerations
 
