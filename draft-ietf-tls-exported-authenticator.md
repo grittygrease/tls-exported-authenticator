@@ -98,7 +98,8 @@ on whether the authenticator is created by the client or the server.
 
 * The Handshake Context is an {{!RFC5705}} (for TLS 1.2) or
 {{!I-D.ietf-tls-tls13}} (for TLS 1.3) exporter value derived using the label
-"EXPORTER-authenticator handshake context" and length 64 bytes.
+"EXPORTER-authenticator handshake context" and length 64 bytes. The
+context_value is absent (length zero).
 
 * The Finished MAC Key is an exporter value derived using the label
 "EXPORTER-server authenticator finished key" or "EXPORTER-client authenticator
