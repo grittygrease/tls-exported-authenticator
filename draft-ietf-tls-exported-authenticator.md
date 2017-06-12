@@ -112,7 +112,8 @@ with the extended master secret {{!RFC7627}} to avoid key synchronization attack
 
 Certificate
 : The certificate to be used for authentication and any
-supporting certificates in the chain.
+supporting certificates in the chain. This structure is defined in {{!I-D.ietf-tls-tls13}}
+section 4.4.2.
 
 The certificate message contains an opaque string called
 certificate_request_context which MUST be unique for a given connection.  Its format
@@ -133,7 +134,8 @@ using the hash function from the handshake and the Finished MAC Key as a key.
 The certificates used in the Certificate message MUST conform to the requirements
 of a Certificate message in the version of TLS negotiated.  This is
 described in section 4.2.3. of {{!I-D.ietf-tls-tls13}} and
-sections 7.4.2. and 7.4.6. of {{!RFC5246}}.
+sections 7.4.2. and 7.4.6. of {{!RFC5246}}.  Alternative certificate formats such as
+{{!RFC7250}} Raw Public Keys are not supported.
 
 The exported authenticator message is the concatenation of messages:
 Certificate || CertificateVerify || Finished
