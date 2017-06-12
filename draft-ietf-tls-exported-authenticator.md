@@ -115,10 +115,12 @@ Certificate
 supporting certificates in the chain.
 
 The certificate message contains an opaque string called
-certificate_request_context which MUST be unique for a given connection.  Its format
-should be defined by the application layer protocol and MUST be non-zero
+certificate_request_context which SHOULD be unique for a given connection.  Its format
+should be defined by the application layer protocol and SHOULD be non-zero
 length.  For example, it may be a sequence number used by the higher-level
-protocol during the transport of the authenticator to the other party.
+protocol during the transport of the authenticator to the other party.  Using
+a unique value allows the application to prevent replays by tying the authenticator
+to a given context.
 
 CertificateVerify
 : A signature over the value
