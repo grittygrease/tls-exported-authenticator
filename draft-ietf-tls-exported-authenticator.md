@@ -179,7 +179,8 @@ framework for analysis.
 
 Authenticators are independent and unidirectional. There is no explicit state change
 inside TLS when an authenticator is either created or validated.
-*  This property makes it difficult to formally prove
+
+* This property makes it difficult to formally prove
 that a server is jointly authoritative over multiple certificates, rather than
 individually authoritative over each.
 * There is no indication in the TLS layer about which point in time an authenticator was
