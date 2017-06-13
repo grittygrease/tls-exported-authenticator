@@ -127,12 +127,11 @@ CertificateVerify
 : A signature over the value
 Hash(Handshake Context || Certificate)
 
-This is described in section 4.2.3. of {{!I-D.ietf-tls-tls13}}.  For servers
-the signature scheme MUST be compatible with the client's advertised support
-and the TLS version.  For TLS 1.2, the signature scheme must match one of
-the signature and hash algorithms advertised in the supported_signature_algorithms
-extension.  For TLS 1.3 it must match one of the signature schemes presented
-in supported_signature_algorithms, excluding all RSASSA-PKCS1-v1_5 algorithms.
+This is described in section 4.2.3. of {{!I-D.ietf-tls-tls13}}.  The signature scheme
+MUST be a valid signature scheme for TLS 1.3.  This excludes all RSASSA-PKCS1-v1_5
+algorithms and ECDSA algorithms that are not supported in TLS 1.3.  For servers,
+this signature scheme must match one of the signature and hash algorithms advertised
+in the signature_algorithms extension of the ClientHello.
 
 Finished
 : A HMAC over the value
@@ -181,11 +180,10 @@ verify correctly, the API returns the following as output:
  * certificate chain and extensions
  * certificate_request_context
 
-In order for the application layer to be able to choose which certificates
-and signature schemes to use when constructing an authenticator.  An API
-SHOULD be exposed that returns an array of TLS 1.3 SignatureScheme
-objects that corresponds to the signature algorithms the library is
-willing to accept as part of an exported authenticator message.
+In order for the application layer to be able to choose the certificates
+and signature schemes to use when constructing an authenticator, a TLS server
+SHOULD exposed an API that returns the content of the signature_algorithms
+extension of client's ClientHello message.
 
 # Security Considerations
 
