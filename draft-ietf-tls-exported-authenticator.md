@@ -119,8 +119,9 @@ certificate_request_context which SHOULD be unique for a given connection.  Its 
 is be defined by the application layer protocol and SHOULD be non-zero
 length.  For example, it may be a sequence number used by the higher-level
 protocol during the transport of the authenticator to the other party.  Using
-a unique value allows the application to prevent replays by tying the authenticator
-to a given context.
+a unique and unpredictable value ties the authenticator to a given context,
+allowing the application to prevent authenticators from being replayed or precomputed by
+an attacker with temporary access to a private key.
 
 CertificateVerify
 : A signature over the value
