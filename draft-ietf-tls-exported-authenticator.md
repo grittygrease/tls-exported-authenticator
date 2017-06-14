@@ -182,7 +182,7 @@ verify correctly, the API returns the following as output:
 
 In order for the application layer to be able to choose the certificates
 and signature schemes to use when constructing an authenticator, a TLS server
-SHOULD exposed an API that returns the content of the signature_algorithms
+SHOULD expose an API that returns the content of the signature_algorithms
 extension of client's ClientHello message.
 
 # Security Considerations
