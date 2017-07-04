@@ -19,10 +19,8 @@ author:
     email: nick@cloudflare.com
 
 normative:
-  I-D.ietf-tls-tls13:
-  RFC5246:
-  RFC5705:
-  RFC7627:
+
+informative:
   SIGMAC:
     title: "A Unilateral-to-Mutual Authentication Compiler for Key Exchange (with Applications to Client Authentication in TLS 1.3)"
     author:
@@ -30,8 +28,6 @@ normative:
       ins: "H. Krawczyk"
     date: 2016
     target: https://eprint.iacr.org/2016/711.pdf
-
-informative:
 
 
 
@@ -87,8 +83,8 @@ used to send the authenticator SHOULD use TLS as its underlying transport.
 
 An authenticator message can be constructed by either the client or the
 server given an established TLS connection, a certificate, and a corresponding private
-key.  This authenticator uses the message structures from section 4.4. of
-{{!I-D.ietf-tls-tls13}}, but different parameters.  Also, unlike the Certificate and
+key.  This authenticator uses the message structures from Section 4.4 of
+{{!TLS13=I-D.ietf-tls-tls13}}, but different parameters.  Also, unlike the Certificate and
 CertificateRequest messages in TLS 1.3, the messages described in this draft
 are not encrypted with a handshake key.
 
@@ -97,7 +93,7 @@ derived from the TLS session.  The Handshake Context is and Finished MAC Key
 are dependent on whether the authenticator is created by the client or the server.
 
 * The Handshake Context is an {{!RFC5705}} (for TLS 1.2) or
-{{!I-D.ietf-tls-tls13}} (for TLS 1.3) exporter value derived using the label
+{{!TLS13}} (for TLS 1.3) exporter value derived using the label
 "EXPORTER-client authenticator handshake context" or "EXPORTER-server authenticator
 handshake context", depending on the sender, and length 64 bytes.  The
 context_value is absent (length zero).
@@ -114,8 +110,8 @@ with the extended master secret {{!RFC7627}} to avoid key synchronization attack
 
 Certificate
 : The certificate to be used for authentication and any
-supporting certificates in the chain. This structure is defined in {{!I-D.ietf-tls-tls13}}
-section 4.4.2.
+supporting certificates in the chain. This structure is defined in {{!TLS13}},
+Section 4.4.2.
 
 The certificate message contains an opaque string called
 certificate_request_context which SHOULD be unique for a given connection.  Its format
@@ -130,7 +126,7 @@ CertificateVerify
 : A signature over the value
 Hash(Handshake Context || Certificate)
 
-This is described in section 4.2.3. of {{!I-D.ietf-tls-tls13}}.  The signature scheme
+This is described in Section 4.2.3 of {{!TLS13}}.  The signature scheme
 MUST be a valid signature scheme for TLS 1.3.  This excludes all RSASSA-PKCS1-v1_5
 algorithms and ECDSA algorithms that are not supported in TLS 1.3.  For servers,
 this signature scheme must match one of the signature and hash algorithms advertised
@@ -144,8 +140,8 @@ using the hash function from the handshake and the Finished MAC Key as a key.
 
 The certificates used in the Certificate message MUST conform to the requirements
 of a Certificate message in the version of TLS negotiated.  This is
-described in section 4.2.3. of {{!I-D.ietf-tls-tls13}} and
-sections 7.4.2. and 7.4.6. of {{!RFC5246}}.  Alternative certificate formats such as
+described in Section 4.2.3 of {{!TLS13}} and
+Sections 7.4.2 and 7.4.6 of {{!RFC5246}}.  Alternative certificate formats such as
 {{!RFC7250}} Raw Public Keys are not supported.
 
 The exported authenticator message is the concatenation of messages:
@@ -189,7 +185,7 @@ and signature schemes to use when constructing an authenticator, a TLS server
 SHOULD expose an API that returns the content of the signature_algorithms
 extension of client's ClientHello message.
 
-# Security Considerations
+# Security Considerations {#security}
 
 The Certificate/Verify/Finished pattern intentionally looks like the TLS 1.3
 pattern which now has been analyzed several times.  In the case where the
@@ -208,7 +204,7 @@ should be tracked as part of the application layer semantics if required.
 
 # Acknowledgements {#ack}
 
-Comments on this proposal were provided by Martin Thomson.  Suggestions for the
-security considerations section were provided by Karthikeyan Bhargavan.
+Comments on this proposal were provided by Martin Thomson.  Suggestions for
+{{security}} were provided by Karthikeyan Bhargavan.
 
 --- back
