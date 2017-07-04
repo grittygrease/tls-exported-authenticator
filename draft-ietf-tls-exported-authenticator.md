@@ -101,18 +101,17 @@ sender:
 * The Handshake Context is an exporter value that is derived using the label
   "EXPORTER-client authenticator handshake context" or "EXPORTER-server
   authenticator handshake context" for authenticators sent by the client and
-  server respectively.  The length of the exported value is 64 bytes.
+  server respectively.
 
 * The Finished MAC Key is an exporter value derived using the label
   "EXPORTER-server authenticator finished key" or "EXPORTER-client authenticator
   finished key" for authenticators sent by the client and server respectively.
-  The length of the exported value is equal to the length of the output of the
-  hash function selected in TLS for the pseudorandom function (PRF); cipher
-  suites that do not use the TLS PRF MUST define a hash function that can be
-  used for this purpose or they cannot be used.
 
 The context_value used for the exporter is absent (length zero) for all four
-values.
+values. The length of the exported value is equal to the length of the output of
+the hash function selected in TLS for the pseudorandom function (PRF). Cipher
+suites that do not use the TLS PRF MUST define a hash function that can be used
+for this purpose or they cannot be used.
 
 If the connection is TLS 1.2, the master secret MUST have been computed
 with the extended master secret {{!RFC7627}} to avoid key synchronization attacks.
