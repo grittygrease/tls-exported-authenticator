@@ -93,21 +93,26 @@ CertificateRequest messages in TLS 1.3, the messages described in this draft
 are not encrypted with a handshake key.
 
 Each authenticator is computed using a Handshake Context and Finished MAC Key
-derived from the TLS session.  The Handshake Context is and Finished MAC Key
-are dependent on whether the authenticator is created by the client or the server.
+derived from the TLS session.  These values are derived using an exporter as
+described in {{!RFC5705}} (for TLS 1.2) or {{!TLS13=I-D.ietf-tls-tls13}} (for
+TLS 1.3).  These values use different labels depending on the role of the
+sender:
 
-* The Handshake Context is an {{!RFC5705}} (for TLS 1.2) or
-{{!I-D.ietf-tls-tls13}} (for TLS 1.3) exporter value derived using the label
-"EXPORTER-client authenticator handshake context" or "EXPORTER-server authenticator
-handshake context", depending on the sender, and length 64 bytes.  The
-context_value is absent (length zero).
+* The Handshake Context is an exporter value that is derived using the label
+  "EXPORTER-client authenticator handshake context" or "EXPORTER-server
+  authenticator handshake context" for authenticators sent by the client and
+  server respectively.  The length of the exported value is 64 bytes.
 
 * The Finished MAC Key is an exporter value derived using the label
-"EXPORTER-server authenticator finished key" or "EXPORTER-client authenticator
-finished key", depending on the sender.  The length of this key is equal to the
-length of the output of the hash function selected in TLS for the pseudorandom
-function (PRF); cipher suites that do not use the TLS PRF MUST define a hash
-function that can be used for this purpose or they cannot be used.
+  "EXPORTER-server authenticator finished key" or "EXPORTER-client authenticator
+  finished key" for authenticators sent by the client and server respectively.
+  The length of the exported value is equal to the length of the output of the
+  hash function selected in TLS for the pseudorandom function (PRF); cipher
+  suites that do not use the TLS PRF MUST define a hash function that can be
+  used for this purpose or they cannot be used.
+
+The context_value used for the exporter is absent (length zero) for all four
+values.
 
 If the connection is TLS 1.2, the master secret MUST have been computed
 with the extended master secret {{!RFC7627}} to avoid key synchronization attacks.
