@@ -128,10 +128,10 @@ an attacker with temporary access to a private key.
 
 CertificateVerify
 : This message is used to provide explicit proof that an endpoint possesses the private key corresponding to its certificate.
-	struct {
-	   SignatureScheme algorithm;
-	   opaque signature<0..2^16-1>;
-	} CertificateVerify;
+       struct {
+          SignatureScheme algorithm;
+          opaque signature<0..2^16-1>;
+       } CertificateVerify;
 
 The algorithm field specifies the signature algorithm used (see section 4.2.3 of {{!TLS13}}
 for the definition of this field). The signature is a digital signature using that algorithm.
