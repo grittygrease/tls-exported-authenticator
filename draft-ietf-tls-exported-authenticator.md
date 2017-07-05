@@ -127,14 +127,23 @@ allowing the application to prevent authenticators from being replayed or precom
 an attacker with temporary access to a private key.
 
 CertificateVerify
-: A signature over the value
-Hash(Handshake Context || Certificate)
+: This message is used to provide explicit proof that an endpoint possesses the private key corresponding to its certificate.
+	struct {
+	   SignatureScheme algorithm;
+	   opaque signature<0..2^16-1>;
+	} CertificateVerify;
 
-This is described in Section 4.2.3 of {{!TLS13}}.  The signature scheme
-MUST be a valid signature scheme for TLS 1.3.  This excludes all RSASSA-PKCS1-v1_5
+The algorithm field specifies the signature algorithm used (see section 4.2.3 of {{!TLS13}}
+for the definition of this field). The signature is a digital signature using that algorithm.
+The signature scheme MUST be a valid signature scheme for TLS 1.3.  This excludes all RSASSA-PKCS1-v1_5
 algorithms and ECDSA algorithms that are not supported in TLS 1.3.  For servers,
 this signature scheme must match one of the signature and hash algorithms advertised
-in the signature_algorithms extension of the ClientHello.
+in the signature_algorithms extension of the ClientHello.  The signature is computed using the over the concatenation of:
+
+* A string that consists of octet 32 (0x20) repeated 64 times
+* The context string "version 1, Exported Authenticator"
+* single 0 byte which serves as the separator
+* The value Hash(Handshake Context || Certificate)
 
 Finished
 : A HMAC over the value
