@@ -118,9 +118,9 @@ supporting certificates in the chain. This structure is defined in {{!TLS13}},
 Section 4.4.2.
 
 The certificate message contains an opaque string called
-certificate_request_context which SHOULD be unique for a given connection.  Its format
-is be defined by the application layer protocol and SHOULD be non-zero
-length.  For example, it may be a sequence number used by the higher-level
+certificate_request_context which MAY be set by the application to differentiate
+exported authentictors.  Its format is be defined by the application layer protocol.
+For example, it may be a sequence number used by the higher-level
 protocol during the transport of the authenticator to the other party.  Using
 a unique and unpredictable value ties the authenticator to a given context,
 allowing the application to prevent authenticators from being replayed or precomputed by
@@ -153,8 +153,7 @@ Certificate || CertificateVerify || Finished
 
 A given exported authenticator can be validated by checking the validity of the
 CertificateVerify message and recomputing the Finished message to see it it
-matches.  If the underlying connection is TLS 1.3, CertificateVerify messages
-with an RSASSA-PKCS1-v1_5 algorithm as its SignatureScheme MUST be rejected.
+matches.
 
 # API considerations
 
@@ -167,7 +166,7 @@ and verify exported authenticator messages.
 Given an established connection, the application SHOULD be able to call an
 "authenticate" API which takes as input:
 
- * certificate_request_context (from 1 to 255 bytes)
+ * certificate_request_context (from 0 to 255 bytes)
  * valid certificate chain for the connection and associated extensions
 (OCSP, SCT, etc.)
  * signer (either the private key associated with the certificate, or interface
