@@ -118,9 +118,9 @@ supporting certificates in the chain. This structure is defined in {{!TLS13}},
 Section 4.4.2.
 
 The certificate message contains an opaque string called
-certificate_request_context which MAY be set by the application to differentiate
-exported authentictors.  Its format is be defined by the application layer protocol.
-For example, it may be a sequence number used by the higher-level
+certificate_request_context.  The format of certificate_request_context is defined by
+the application layer protocol and its value can be used to differentiate exported
+authenticators.  For example, the application may use a sequence number used by the higher-level
 protocol during the transport of the authenticator to the other party.  Using
 a unique and unpredictable value ties the authenticator to a given context,
 allowing the application to prevent authenticators from being replayed or precomputed by
@@ -128,12 +128,13 @@ an attacker with temporary access to a private key.
 
 CertificateVerify
 : This message is used to provide explicit proof that an endpoint possesses the private key corresponding to its certificate.
+
        struct {
           SignatureScheme algorithm;
           opaque signature<0..2^16-1>;
        } CertificateVerify;
 
-The algorithm field specifies the signature algorithm used (see section 4.2.3 of {{!TLS13}}
+The algorithm field specifies the signature algorithm used (see Section 4.2.3 of {{!TLS13}}
 for the definition of this field). The signature is a digital signature using that algorithm.
 The signature scheme MUST be a valid signature scheme for TLS 1.3.  This excludes all RSASSA-PKCS1-v1_5
 algorithms and ECDSA algorithms that are not supported in TLS 1.3.  For servers,
@@ -141,7 +142,7 @@ this signature scheme must match one of the signature and hash algorithms advert
 in the signature_algorithms extension of the ClientHello.  The signature is computed using the over the concatenation of:
 
 * A string that consists of octet 32 (0x20) repeated 64 times
-* The context string "version 1, Exported Authenticator"
+* The context string "Exported Authenticator"
 * single 0 byte which serves as the separator
 * The value Hash(Handshake Context || Certificate)
 
