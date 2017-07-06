@@ -143,8 +143,9 @@ in the signature_algorithms extension of the ClientHello.  The signature is comp
 
 * A string that consists of octet 32 (0x20) repeated 64 times
 * The context string "Exported Authenticator"
-* single 0 byte which serves as the separator
-* The value Hash(Handshake Context || Certificate)
+* A single 0 byte which serves as the separator
+* The value
+Hash(Handshake Context || Certificate)
 
 Finished
 : A HMAC over the value
