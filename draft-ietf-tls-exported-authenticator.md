@@ -142,7 +142,7 @@ this signature scheme must match one of the signature and hash algorithms advert
 in the signature_algorithms extension of the ClientHello.  The signature is computed using the over the concatenation of:
 
 * A string that consists of octet 32 (0x20) repeated 64 times
-* The context string "Exported Authenticator"
+* The context string "Exported Authenticator" (which is not NULL-terminated)
 * A single 0 byte which serves as the separator
 * The value
 Hash(Handshake Context || Certificate)
