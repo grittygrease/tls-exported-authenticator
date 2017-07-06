@@ -161,7 +161,7 @@ The exported authenticator message is the concatenation of messages:
 Certificate || CertificateVerify || Finished
 
 A given exported authenticator can be validated by checking the validity of the
-CertificateVerify message and recomputing the Finished message to see it it
+CertificateVerify message and recomputing the Finished message to see if it
 matches.
 
 # API considerations
