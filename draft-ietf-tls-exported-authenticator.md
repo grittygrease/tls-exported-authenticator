@@ -118,23 +118,34 @@ supporting certificates in the chain. This structure is defined in {{!TLS13}},
 Section 4.4.2.
 
 The certificate message contains an opaque string called
-certificate_request_context which SHOULD be unique for a given connection.  Its format
-is be defined by the application layer protocol and SHOULD be non-zero
-length.  For example, it may be a sequence number used by the higher-level
+certificate_request_context.  The format of certificate_request_context is defined by
+the application layer protocol and its value can be used to differentiate exported
+authenticators.  For example, the application may use a sequence number used by the higher-level
 protocol during the transport of the authenticator to the other party.  Using
 a unique and unpredictable value ties the authenticator to a given context,
 allowing the application to prevent authenticators from being replayed or precomputed by
 an attacker with temporary access to a private key.
 
 CertificateVerify
-: A signature over the value
-Hash(Handshake Context || Certificate)
+: This message is used to provide explicit proof that an endpoint possesses the private key corresponding to its certificate.
 
-This is described in Section 4.2.3 of {{!TLS13}}.  The signature scheme
-MUST be a valid signature scheme for TLS 1.3.  This excludes all RSASSA-PKCS1-v1_5
+       struct {
+          SignatureScheme algorithm;
+          opaque signature<0..2^16-1>;
+       } CertificateVerify;
+
+The algorithm field specifies the signature algorithm used (see Section 4.2.3 of {{!TLS13}}
+for the definition of this field). The signature is a digital signature using that algorithm.
+The signature scheme MUST be a valid signature scheme for TLS 1.3.  This excludes all RSASSA-PKCS1-v1_5
 algorithms and ECDSA algorithms that are not supported in TLS 1.3.  For servers,
 this signature scheme must match one of the signature and hash algorithms advertised
-in the signature_algorithms extension of the ClientHello.
+in the signature_algorithms extension of the ClientHello.  The signature is computed using the over the concatenation of:
+
+* A string that consists of octet 32 (0x20) repeated 64 times
+* The context string "Exported Authenticator" (which is not NULL-terminated)
+* A single 0 byte which serves as the separator
+* The value
+Hash(Handshake Context || Certificate)
 
 Finished
 : A HMAC over the value
@@ -152,9 +163,8 @@ The exported authenticator message is the concatenation of messages:
 Certificate || CertificateVerify || Finished
 
 A given exported authenticator can be validated by checking the validity of the
-CertificateVerify message and recomputing the Finished message to see it it
-matches.  If the underlying connection is TLS 1.3, CertificateVerify messages
-with an RSASSA-PKCS1-v1_5 algorithm as its SignatureScheme MUST be rejected.
+CertificateVerify message and recomputing the Finished message to see if it
+matches.
 
 # API considerations
 
@@ -167,7 +177,7 @@ and verify exported authenticator messages.
 Given an established connection, the application SHOULD be able to call an
 "authenticate" API which takes as input:
 
- * certificate_request_context (from 1 to 255 bytes)
+ * certificate_request_context (from 0 to 255 bytes)
  * valid certificate chain for the connection and associated extensions
 (OCSP, SCT, etc.)
  * signer (either the private key associated with the certificate, or interface
